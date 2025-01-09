@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
 import static jakarta.persistence.FetchType.LAZY;
-import static jakarta.persistence.GenerationType.SEQUENCE;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -16,7 +16,7 @@ import static lombok.AccessLevel.PROTECTED;
 public class BoardHit extends BaseEntity{
 
     @Id
-    @GeneratedValue(strategy = SEQUENCE)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "hit_id")
     private Long id;
 

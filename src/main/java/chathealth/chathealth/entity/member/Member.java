@@ -24,7 +24,7 @@ import static lombok.AccessLevel.PROTECTED;
 public abstract class Member extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
     @Column(unique = true)

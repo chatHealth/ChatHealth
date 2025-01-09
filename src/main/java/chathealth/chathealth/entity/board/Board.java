@@ -27,7 +27,7 @@ import static lombok.AccessLevel.PROTECTED;
 //@SQLDelete(sql = "UPDATE board SET deleted_date = SYSDATE where board_id = ?") // oracle
 public class Board extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "board_id")
     private Long id;
 
