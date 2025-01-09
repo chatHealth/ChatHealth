@@ -7,7 +7,6 @@ import chathealth.chathealth.dto.request.BoardSearchDto;
 import chathealth.chathealth.dto.response.BoardResponse;
 import chathealth.chathealth.dto.response.PageResponse;
 import chathealth.chathealth.dto.response.member.CustomUserDetails;
-import chathealth.chathealth.entity.BoardHit;
 import chathealth.chathealth.entity.board.Board;
 import chathealth.chathealth.entity.board.Category;
 import chathealth.chathealth.entity.member.Member;
@@ -17,7 +16,6 @@ import chathealth.chathealth.exception.NotPermitted;
 import chathealth.chathealth.exception.UserNotFound;
 import chathealth.chathealth.repository.MemberRepository;
 import chathealth.chathealth.repository.board.BoardRepository;
-import chathealth.chathealth.repository.boardHit.BoardHitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +33,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    private final BoardHitRepository boardHitRepository;
+    private final BoardHitService boarHitService;
 
     //게시글 생성
     public Board createBoard(BoardCreateDto boardCreateDto, Long id) {
@@ -55,6 +53,7 @@ public class BoardService {
                 .content(boardCreateDto.getContent())
                 .category(boardCreateDto.getCategory())
                 .user((Users) member)
+                .hit(0L)
                 .build();
 
         return boardRepository.save(board);
@@ -101,7 +100,7 @@ public class BoardService {
                         .nickname(board.getUser().getNickname())
                         .grade(board.getUser().getGrade())
                         .commentCount(board.getBoardCommentList().size())
-                        .hit(board.getBoardHitList().size())
+                        .hit(board.getHit())
                         .name(board.getUser().getName())
                         .category(board.getCategory())
                         .build())
@@ -113,7 +112,7 @@ public class BoardService {
                         .boardId(board.getId())
                         .title(board.getTitle())
                         .createdDate(board.getCreatedDate())
-                        .hit(board.getBoardHitList().size())
+                        .hit(board.getHit())
                         .category(board.getCategory())
                         .build())
                 .toList();
@@ -131,16 +130,17 @@ public class BoardService {
         String email = (customUserDetails == null) ? null : customUserDetails.getLoggedMember().getEmail();
         Role role = customUserDetails != null ? customUserDetails.getLoggedMember().getRole() : null;
 
-        // 로그인한 유저가 12시간 내 조회하지 않았으면 조회수 증가
+        // 조회수 증가
+
+        Users user = board.getUser();
+
+        //조회 유저
         if (customUserDetails != null) {
-            Member findMember = memberRepository.findByEmail(email).orElseThrow(UserNotFound::new);
-            if (!boardHitRepository.existsHit(board, findMember)) {
-                boardHitRepository.save(new BoardHit(board, findMember));
-            }
+            Member member = customUserDetails.getLoggedMember();
+            increaseHitCount(board.getId(), member.getId());
         }
 
 
-        Users user = board.getUser();
         return BoardResponse.builder()
                 .boardId(board.getId())
                 .title(board.getTitle())
@@ -154,7 +154,7 @@ public class BoardService {
                 .profile(user.getProfile())
                 .grade(user.getGrade())
                 .commentCount(board.getBoardCommentList().size())
-                .hit(board.getBoardHitList().size())
+                .hit(board.getHit())
                 .isWriter(user.getEmail().equals(email) || (role != null && role.equals(ROLE_ADMIN)))
                 .build();
     }
@@ -174,5 +174,9 @@ public class BoardService {
                 .content(boardSearchDto.getContent())
                 .category(boardSearchDto.getCategory())
                 .build();
+    }
+
+    private void increaseHitCount(Long boardId, long memberId) {
+        boarHitService.increaseHit(boardId, memberId);
     }
 }

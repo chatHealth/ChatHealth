@@ -3,7 +3,6 @@ package chathealth.chathealth.entity.board;
 import chathealth.chathealth.dto.request.BoardEditDto;
 import chathealth.chathealth.entity.BaseEntity;
 import chathealth.chathealth.entity.BoardComment;
-import chathealth.chathealth.entity.BoardHit;
 import chathealth.chathealth.entity.member.Users;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -39,6 +38,9 @@ public class Board extends BaseEntity {
 
     private LocalDateTime deletedDate;
 
+    @Column(nullable = false, columnDefinition = "BIGINT default 0")
+    private Long hit = 0L;
+
     @Enumerated(STRING)
     private Category category;
 
@@ -46,8 +48,8 @@ public class Board extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Users user;
 
-    @OneToMany(mappedBy = "board")
-    private final List<BoardHit> boardHitList = new ArrayList<>();
+//    @OneToMany(mappedBy = "board")
+//    private final List<BoardHit> boardHitList = new ArrayList<>();
 
     @OneToMany(mappedBy = "board")
     private final List<BoardComment> boardCommentList = new ArrayList<>();
@@ -57,4 +59,5 @@ public class Board extends BaseEntity {
         if (boardEditDto.getContent() != null) this.content = boardEditDto.getContent();
         if (boardEditDto.getCategory() != null) this.category = boardEditDto.getCategory();
     }
+
 }
