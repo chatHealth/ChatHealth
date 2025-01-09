@@ -17,17 +17,36 @@ public class BoardHitService {
     private final StringRedisTemplate redisTemplate;
     private final BoardRepository boardRepository;
 
+    // 로그인 사용자
     public boolean isUniqueView(Long boardId, Long memberId) {
         String key = "boardViewed:" + boardId + ":" + memberId;
         Boolean isNewView = redisTemplate.opsForValue().setIfAbsent(key, "1", 24, TimeUnit.HOURS);
         return Boolean.TRUE.equals(isNewView);
     }
 
-    public void increaseHit(Long boardId, Long memberId){
-        if (isUniqueView(boardId, memberId)) {
+    // 비로그인 사용자
+    public boolean isUniqueView(Long boardId, String ipAddr){
+        String key = "boardViewed:" + boardId + ":" + ipAddr;
+        Boolean isNewView = redisTemplate.opsForValue().setIfAbsent(key, "1", 24, TimeUnit.HOURS);
+        return Boolean.TRUE.equals(isNewView);
+    }
+
+    public void increaseHit(Long boardId, Long memberId, String ipAddr){
+        boolean isUnique;
+        if (memberId != 0) {
+            isUnique = isUniqueView(boardId, memberId);
+        } else {
+            isUnique = isUniqueView(boardId, ipAddr);
+        }
+
+        if(isUnique){
             String key = "boardHit:" + boardId;
             redisTemplate.opsForValue().increment(key);
         }
+//        if (isUniqueView(boardId, memberId)) {
+//            String key = "boardHit:" + boardId;
+//            redisTemplate.opsForValue().increment(key);
+//        }
     }
 
     @Transactional

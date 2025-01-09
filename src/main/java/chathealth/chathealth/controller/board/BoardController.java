@@ -6,6 +6,7 @@ import chathealth.chathealth.dto.response.BoardResponse;
 import chathealth.chathealth.dto.response.member.CustomUserDetails;
 import chathealth.chathealth.exception.NotPermitted;
 import chathealth.chathealth.service.BoardService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -40,15 +41,15 @@ public class BoardController {
     }
 
     @GetMapping("/board/{id}")
-    public String getBoard(@PathVariable long id, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        model.addAttribute("board", boardService.getBoard(id, customUserDetails));
+    public String getBoard(@PathVariable long id, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletRequest request) {
+        model.addAttribute("board", boardService.getBoard(id, customUserDetails, request));
         return "board/board";
     }
 
     @GetMapping("/board/{id}/edit")
-    public String editForm(@PathVariable long id, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public String editForm(@PathVariable long id, Model model, @AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletRequest request) {
         // 자신이 작성한 글만 수정 가능
-        BoardResponse board = boardService.getBoard(id, customUserDetails);
+        BoardResponse board = boardService.getBoard(id, customUserDetails, request);
         if (!board.getIsWriter()) {
             throw new NotPermitted("작성자만 수정할 수 있습니다.");
         }

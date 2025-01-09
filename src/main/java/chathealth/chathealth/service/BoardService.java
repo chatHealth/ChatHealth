@@ -16,6 +16,7 @@ import chathealth.chathealth.exception.NotPermitted;
 import chathealth.chathealth.exception.UserNotFound;
 import chathealth.chathealth.repository.MemberRepository;
 import chathealth.chathealth.repository.board.BoardRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -119,7 +120,7 @@ public class BoardService {
     }
 
     //게시글 조회
-    public BoardResponse getBoard(long id, CustomUserDetails customUserDetails) {
+    public BoardResponse getBoard(long id, CustomUserDetails customUserDetails, HttpServletRequest request) {
         Board board = boardRepository.findById(id).orElseThrow(BoardNotFoundException::new);
 
         // 삭제된 게시물은 조회 불가
@@ -137,7 +138,9 @@ public class BoardService {
         //조회 유저
         if (customUserDetails != null) {
             Member member = customUserDetails.getLoggedMember();
-            increaseHitCount(board.getId(), member.getId());
+            increaseHitCount(board.getId(), member.getId(), request.getRemoteAddr());
+        } else {
+            increaseHitCount(board.getId(), 0, request.getRemoteAddr());
         }
 
 
@@ -176,7 +179,7 @@ public class BoardService {
                 .build();
     }
 
-    private void increaseHitCount(Long boardId, long memberId) {
-        boarHitService.increaseHit(boardId, memberId);
+    private void increaseHitCount(Long boardId, long memberId, String ipAddr) {
+        boarHitService.increaseHit(boardId, memberId, ipAddr);
     }
 }
