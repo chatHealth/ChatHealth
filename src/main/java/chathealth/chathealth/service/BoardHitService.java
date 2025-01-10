@@ -43,10 +43,6 @@ public class BoardHitService {
             String key = "boardHit:" + boardId;
             redisTemplate.opsForValue().increment(key);
         }
-//        if (isUniqueView(boardId, memberId)) {
-//            String key = "boardHit:" + boardId;
-//            redisTemplate.opsForValue().increment(key);
-//        }
     }
 
     @Transactional
